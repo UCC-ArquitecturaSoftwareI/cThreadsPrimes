@@ -2,13 +2,13 @@
 #include <mutex>
 #include <iostream>
 #include <vector>
-#include <queue>
+#include "safeQueue.h"
 
 using namespace std;
 
 mutex mtx_pantalla;
 mutex mtx_cola;
-queue<int> datos;
+safeQueue<int> datos;
 
 bool esPrimo(unsigned long long num) {
 
@@ -21,14 +21,11 @@ bool esPrimo(unsigned long long num) {
 
 
 void hilo() {
-    int i;
+    int i, err=0;
 
-    while (!datos.empty()) {
-        mtx_cola.lock();
-        i = datos.front();
-        datos.pop();
-        mtx_cola.unlock();
-        if (esPrimo(i)) {
+    while (err == 0) {
+        i = datos.desencolar(err);
+        if (err == 0 && esPrimo(i)) {
             mtx_pantalla.lock();
             cout << i << " es primo " << this_thread::get_id() << endl;
             mtx_pantalla.unlock();
@@ -47,15 +44,16 @@ int main() {
     vector<thread> hilos;
 
 
-    int N = 3;
+    int N = 10000;
+
+    for (int i = 1; i < MAX_NUMBER; i++) {
+        datos.encolar(i);
+    }
 
     for (int i = 0; i < N; i++) {
         hilos.emplace_back(hilo);
     }
 
-    for (int i = 1; i < MAX_NUMBER; i++) {
-        datos.push(i);
-    }
 
 
     for (auto &h: hilos) {

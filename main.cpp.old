@@ -1,0 +1,39 @@
+#include <thread>
+#include <iostream>
+using namespace std;
+
+bool esPrimo(unsigned long long num){
+
+    for(int i = 2; i < num; i++)
+        if(num%i == 0){
+            return false;
+        }
+    return true;
+}
+
+
+void hilo(int a,int j){
+    for(int i=a ; i < j ;i+=4){
+        if(esPrimo(i)){
+            cout << i << " es primo " << this_thread::get_id() << endl;
+        }
+    }
+
+    cout << "Termine" << endl;
+}
+
+
+int main() {
+    thread hilo1(hilo,1,100000);
+    thread hilo2(hilo,2,100000);
+    thread hilo3(hilo,3,100000);
+    thread hilo4(hilo,4,100000);
+
+    hilo1.join();
+    hilo2.join();
+    hilo3.join();
+    hilo4.join();
+
+
+    return 0;
+}
